@@ -21,6 +21,12 @@ jQuery.noConflict();
     spaceElement.appendChild(fragment);
   });
 
+  kintone.events.on('app.record.detail.show', function (event) {
+    console.log(event.record)
+    console.log(event.record.multi.value)
+    console.log(kintone.app.record.getFieldElement('multi'))
+  });
+
   kintone.events.on('app.record.edit.show', function (event) {
     console.log("plugin is here")
     console.log("new git success")
@@ -57,6 +63,9 @@ jQuery.noConflict();
         markdown: {
           toc: true,
         },
+      },
+      resize: {
+        enable: true
       },
       hint: {
         emojiPath: 'https://cdn.jsdelivr.net/npm/vditor@1.8.3/dist/images/emoji',
