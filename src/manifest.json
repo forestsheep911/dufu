@@ -1,0 +1,41 @@
+{
+  "manifest_version": 1,
+  "version": 1,
+  "type": "APP",
+  "desktop": {
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "https://cdn.jsdelivr.net/npm/vditor@3.0.11/dist/index.min.js",
+      "js/desktop.js"
+    ],
+    "css": [
+      "css/51-modern-default.css",
+      "css/desktop.css",
+      "css/index.css"
+    ]
+  },
+  "icon": "image/icon.png",
+  "config": {
+    "html": "html/config.html",
+    "js": [
+      "https://js.cybozu.com/jquery/3.3.1/jquery.min.js",
+      "js/config.js"
+    ],
+    "css": [
+      "css/51-modern-default.css",
+      "css/config.css"
+    ],
+    "required_params": [
+      "message"
+    ]
+  },
+  "name": {
+    "en": "first"
+  },
+  "description": {
+    "en": "my first kintone plugin"
+  },
+  "homepage_url": {
+    "en": "http://www.bxu1.com"
+  }
+}
