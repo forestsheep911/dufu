@@ -1,93 +1,102 @@
 jQuery.noConflict();
 
 (function ($, PLUGIN_ID) {
-  'use strict';
+    'use strict';
+    let config = kintone.plugin.app.getConfig(PLUGIN_ID);
+    let vditor;
+    kintone.events.on('app.record.index.show', function () {});
 
-  kintone.events.on('app.record.index.show', function () {
-    var config = kintone.plugin.app.getConfig(PLUGIN_ID);
+    kintone.events.on(['app.record.detail.show', 'app.record.print.show'], function (event) {
+        let mtcode = config.mtcode;
+        let spcode = config.spcode;
+        let multiEle = kintone.app.record.getSpaceElement(spcode);
+        let markdownValue = event.record[mtcode].value;
+        kintone.app.record.setFieldShown(mtcode, false)
 
-    var spaceElement = kintone.app.getHeaderSpaceElement();
-    var fragment = document.createDocumentFragment();
-    var headingEl = document.createElement('h3');
-    var messageEl = document.createElement('p');
+        let markdownPreviewDiv = document.createElement("div");
+        $(multiEle).after(markdownPreviewDiv);
 
-    messageEl.classList.add('plugin-space-message');
-    messageEl.textContent = config.message;
-    headingEl.classList.add('plugin-space-heading');
-    headingEl.textContent = 'Hello kintone plugin!';
+        Vditor.preview(markdownPreviewDiv,
+            markdownValue, {
+                markdown: {
+                    toc: true,
+                },
+                hljs: {
+                    style: 'manni'
+                },
+                speech: {
+                    enable: true,
+                },
+                anchor: true,
+            })
+        return event
+    });
 
-    fragment.appendChild(headingEl);
-    fragment.appendChild(messageEl);
-    spaceElement.appendChild(fragment);
-  });
 
-  kintone.events.on('app.record.detail.show', function (event) {
-    console.log(event.record)
-    console.log(event.record.multi.value)
-    console.log(kintone.app.record.getFieldElement('multi'))
-  });
 
-  kintone.events.on('app.record.edit.show', function (event) {
-    console.log("plugin is here")
-    console.log("new git success")
-    let textElement = document.getElementsByClassName("row-gaia clearFix-cybozu")[0]
-    let addnewTextAreaElement = document.createElement("div")
-    textElement.parentNode.append(addnewTextAreaElement)
-    let markdownTextContent = "# title1"
-    Vditor.preview(addnewTextAreaElement,
-      markdownTextContent, {
-        markdown: {
-          toc: true,
-        },
-        hljs: {
-          style: 'native'
-        },
-        speech: {
-          enable: true,
-        },
-        anchor: true,
-      })
+    kintone.events.on('app.record.edit.submit', function (event) {
+        let mtcode = config.mtcode;
+        event.record[mtcode].value = vditor.getValue();
+        return event;
+    });
 
-    let edittingVeditor = document.createElement("div")
-    edittingVeditor.setAttribute("id", "vditor")
-    textElement.parentNode.append(edittingVeditor)
+    kintone.events.on(['app.record.edit.show', 'app.record.create.show'], function (event) {
+        console.log(event)
+        let mtcode = config.mtcode;
+        let spcode = config.spcode;
+        let spaceEle = kintone.app.record.getSpaceElement(spcode);
+        let markdownValue = event.record[mtcode].value;
+        kintone.app.record.setFieldShown(mtcode, false)
 
-    const vditor = new Vditor('vditor', {
-      debugger: true,
-      typewriterMode: true,
-      placeholder: 'placeholder',
-      counter: 100,
-      height: 500,
-      width:1400,
-      preview: {
-        markdown: {
-          toc: true,
-        },
-      },
-      resize: {
-        enable: true
-      },
-      hint: {
-        emojiPath: 'https://cdn.jsdelivr.net/npm/vditor@1.8.3/dist/images/emoji',
-        emojiTail: '<a href="https://hacpai.com/settings/function" target="_blank">设置常用表情</a>',
-        emoji: {
-          'sd': '💔',
-          'j': 'https://unpkg.com/vditor@1.3.1/dist/images/emoji/j.png',
-        },
-      },
-      tab: '\t',
-      upload: {
-        accept: 'image/*,.mp3, .wav, .rar',
-        token: 'test',
-        url: '/api/upload/editor',
-        linkToImgUrl: '/api/upload/fetch',
-        filename(name) {
-          return name.replace(/[^(a-zA-Z0-9\u4e00-\u9fa5\.)]/g, '').
-          replace(/[\?\\/:|<>\*\[\]\(\)\$%\{\}@~]/g, '').
-          replace('/\\s/g', '')
-        },
-      },
-    })
-  });
+        let edittingVeditor = document.createElement("div")
+        edittingVeditor.setAttribute("id", "vditor")
+        spaceEle.append(edittingVeditor)
+
+        vditor = new Vditor('vditor', {
+            cache: {
+                enable: false
+            },
+            debugger: true,
+            typewriterMode: true,
+            placeholder: '空白',
+            counter: 100,
+            height: 610,
+            width: 1400,
+            mode: "sv",
+            preview: {
+                markdown: {},
+                hljs: {
+                    style: 'manni',
+                    lineNumber: true
+                }
+            },
+            resize: {
+                enable: true
+            },
+            hint: {
+                emojiPath: 'https://cdn.jsdelivr.net/npm/vditor@1.8.3/dist/images/emoji',
+                emojiTail: '<a href="https://hacpai.com/settings/function" target="_blank">设置常用表情</a>',
+                emoji: {
+                    'sd': '💔',
+                    'j': 'https://unpkg.com/vditor@1.3.1/dist/images/emoji/j.png',
+                },
+            },
+            tab: '    ',
+            upload: {
+                accept: 'image/*,.mp3, .wav, .rar',
+                token: 'test',
+                url: '/api/upload/editor',
+                linkToImgUrl: '/api/upload/fetch',
+                filename(name) {
+                    return name.replace(/[^(a-zA-Z0-9\u4e00-\u9fa5\.)]/g, '').
+                    replace(/[\?\\/:|<>\*\[\]\(\)\$%\{\}@~]/g, '').
+                    replace('/\\s/g', '')
+                },
+            },
+        })
+        setTimeout(() => {
+            vditor.setValue(markdownValue)
+        }, 300);
+    });
 
 })(jQuery, kintone.$PLUGIN_ID);
